@@ -8,22 +8,19 @@ self-hosted is also supported. If you use self-hosted, install Xcode.
 
 ## Inputs
 
-You can add a single p12 key+cert file with `p12-base64`, or if you have key and cert in separate files
-you can add them with `p12-key-base64` and `p12-cer-base64`. One of the two options is required.
+### p12
 
-### `project-path`
+You can add a single p12 key+cert file with `p12-base64`, or if you have key and cert in separate files you can add them with `p12-key-base64` and `p12-cer-base64`. One of the two options is required.
 
-**Required** .xcodeproj path.
-
-### `p12-base64`
+#### `p12-base64`
 
 **Required if single file**: Base64 encoded p12 file (key + cert).
 
-### `p12-key-base64`
+#### `p12-key-base64`
 
 **Required if split key/cert**: Base64 encoded p12 key file.
 
-### `p12-cer-base64`
+#### `p12-cer-base64`
 
 **Required if split key/cert**: Base64 encoded certificate for the p12 key.
 
@@ -51,13 +48,17 @@ You can add a single mobileprovision file with `mobileprovision-base64`, or if y
 
 In JSON, the key is base64 encoded mobileprovision file, and the value is an array of target names.
 
+### `project-path`
+
+**Required**: .xcodeproj path.
+
 ### `code-signing-identity`
 
-**Required** For example, `"iOS Distribution"`.
+**Required**: For example, `"iOS Distribution"`.
 
 ### `team-id`
 
-**Required** Team id.
+**Required**: Team id.
 
 ### `workspace-path`
 
@@ -65,7 +66,7 @@ In JSON, the key is base64 encoded mobileprovision file, and the value is an arr
 
 ### `export-method`
 
-Choose app-store, `"ad-hoc"`, `"package"` `"enterprise"`, `"development"`, or `"developer-id"`. Default `"app-store"`.
+Choose `"app-store"`, `"ad-hoc"`, `"package"` `"enterprise"`, `"development"`, or `"developer-id"`. Default `"app-store"`.
 
 ### `configuration`
 
@@ -73,7 +74,7 @@ For example, `"Debug"`, `"Release"`. Default `"Release"`.
 
 ### `scheme`
 
-For example, `"myscheme"`.
+For example, `"MyScheme"`.
 
 ### `certificate-password`
 
@@ -85,7 +86,7 @@ Output path of ipa. Default `"output.ipa"`.
 
 ### `disable-targets`
 
-These targets will not use automatic code signing and instead use the identity specified in other inputs. Input targets separated by ','. For example, 'MyApp,YourApp'. Default "". (default to all targets)
+These targets will not use automatic code signing and instead use the identity specified in other inputs. Input targets separated by `","`. For example, `"MyApp,YourApp"`. Default `""`. (default to all targets)
 
 ## Contributions Welcome!
 
