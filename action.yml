@@ -15,7 +15,10 @@ inputs:
     required: false
   mobileprovision-base64:
     description: "Base64 encoded mobileprovision file"
-    required: true
+    required: false
+  multi-mobileprovision-base64:
+    description: "Multiple base64 encoded mobileprovision files"
+    required: false
   code-signing-identity:
     description: "For example, iOS Distribution"
     required: true

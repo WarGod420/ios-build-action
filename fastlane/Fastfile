@@ -3,6 +3,7 @@ default_platform(:ios)
 platform :ios do
   desc "Export ipa"
   lane :export_ipa do
+    decode_file
     keychain_password = SecureRandom.uuid
     create_keychain(
       name: "ios-build.keychain",
@@ -11,7 +12,7 @@ platform :ios do
       unlock: true,
       timeout: 3600
     )
-    if ENV["CERTIFICATE_SPLIT"] == '1'
+    if @is_split_cer
       import_certificate(
         certificate_path: "ios-build-key.p12",
         certificate_password: ENV["CERTIFICATE_PASSWORD"],
@@ -35,27 +36,36 @@ platform :ios do
         log_output: true
       )
     end
-    install_provisioning_profile(
-      path: "ios-build.mobileprovision"
-    )
+    @profiles.each_key do |key|
+      install_provisioning_profile(
+        path: key
+      )
+    end
     disable_targets = ENV["DISABLE_TARGETS"]&.split(/,/)
     update_code_signing_settings(
       use_automatic_signing: false,
       path: ENV["PROJECT_PATH"],
       targets: disable_targets
     )
-    update_project_provisioning(
-      xcodeproj: ENV["PROJECT_PATH"],
-      profile: "ios-build.mobileprovision",
-      code_signing_identity: ENV["CODE_SIGNING_IDENTITY"],
-      target_filter: disable_targets&.map{|target| "^#{Regexp.escape(target)}$" }.join("|")
-    )
+    @profiles.each do |key, value|
+      if !value.nil?
+        targets = !disable_targets.nil? ? value & disable_targets : value
+      else
+        targets = disable_targets
+      end
+      update_project_provisioning(
+        xcodeproj: ENV["PROJECT_PATH"],
+        profile: key,
+        code_signing_identity: ENV["CODE_SIGNING_IDENTITY"],
+        target_filter: targets&.map{|target| "^#{Regexp.escape(target)}$" }.join("|")
+      )
+    end
     update_project_team(
       path: ENV["PROJECT_PATH"],
       teamid: ENV["TEAM_ID"],
       targets: disable_targets
     )
-    if ENV["WORKSPACE_PATH"] != ""
+    if !ENV["WORKSPACE_PATH"].empty?
       build_app(
         workspace: ENV["WORKSPACE_PATH"],
         configuration: ENV["CONFIGURATION"],
@@ -79,5 +89,27 @@ platform :ios do
     delete_keychain(
       name: "ios-build.keychain"
     )
+  end
+
+  def decode_file
+    @is_split_cer = !ENV["P12_KEY_BASE64"].empty? && !ENV["P12_CER_BASE64"].empty?
+    if @is_split_cer
+      File.write("../ios-build-key.p12", Base64.decode64(ENV["P12_KEY_BASE64"]))
+      File.write("../ios-build-key.cer", Base64.decode64(ENV["P12_CER_BASE64"]))
+    else
+      File.write("../ios-build.p12", Base64.decode64(ENV["P12_BASE64"]))
+    end
+    @profiles = {}
+    if !ENV["MULTI_MOBILEPROVISION_BASE64"].empty?
+      JSON.parse(ENV["MULTI_MOBILEPROVISION_BASE64"]).each.with_index(1) do |(key, value), index|
+        filename = "ios-build-#{index}.mobileprovision"
+        File.write("../#{filename}", Base64.decode64(key))
+        @profiles[filename] = value
+      end
+    else
+      filename = "ios-build.mobileprovision"
+      File.write("../#{filename}", Base64.decode64(ENV["MOBILEPROVISION_BASE64"]))
+      @profiles[filename] = nil
+    end
   end
 end

@@ -3,17 +3,30 @@ const exec = require("@actions/exec");
 
 async function run() {
   try {
-    // Validate p12 keys.
-    if (!core.getInput("p12-base64")
-      && (!core.getInput("p12-cer-base64") || !core.getInput("p12-cer-base64"))) {
+    // Validate p12 and mobileprovision
+    if (
+      !core.getInput("p12-base64") &&
+      (!core.getInput("p12-cer-base64") || !core.getInput("p12-cer-base64"))
+    ) {
       throw new Error("P12 keys missing or in the wrong format.");
     }
+    if (
+      !core.getInput("mobileprovision-base64") &&
+      !core.getInput("multi-mobileprovision-base64")
+    ) {
+      throw new Error("mobileprovision missing or in the wrong format.");
+    }
+
+    // Set environment variables
     process.env.PROJECT_PATH = core.getInput("project-path");
     process.env.P12_BASE64 = core.getInput("p12-base64");
     process.env.P12_KEY_BASE64 = core.getInput("p12-key-base64");
     process.env.P12_CER_BASE64 = core.getInput("p12-cer-base64");
     process.env.MOBILEPROVISION_BASE64 = core.getInput(
       "mobileprovision-base64"
+    );
+    process.env.MULTI_MOBILEPROVISION_BASE64 = core.getInput(
+      "multi-mobileprovision-base64"
     );
     process.env.CODE_SIGNING_IDENTITY = core.getInput("code-signing-identity");
     process.env.TEAM_ID = core.getInput("team-id");
@@ -24,6 +37,8 @@ async function run() {
     process.env.OUTPUT_PATH = core.getInput("output-path");
     process.env.SCHEME = core.getInput("scheme");
     process.env.DISABLE_TARGETS = core.getInput("disable-targets");
+
+    // Execute build.sh
     await exec.exec(`bash ${__dirname}/build.sh`);
   } catch (error) {
     core.setFailed(error.message);

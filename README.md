@@ -27,9 +27,29 @@ you can add them with `p12-key-base64` and `p12-cer-base64`. One of the two opti
 
 **Required if split key/cert**: Base64 encoded certificate for the p12 key.
 
-### `mobileprovision-base64`
+### mobileprovision
 
-**Required** Base64 encoded mobileprovision file.
+You can add a single mobileprovision file with `mobileprovision-base64`, or if you have multiple mobileprovision files you can add them with `multi-mobileprovision-base64`. One of the two options is required.
+
+#### `mobileprovision-base64`
+
+**Required if single file**: Base64 encoded mobileprovision file.
+
+#### `multi-mobileprovision-base64`
+
+**Required if multiple files**: Multiple base64 encoded mobileprovision file. This is written in JSON format.
+
+```yaml
+- uses: yukiarrr/ios-build-action@v1.2.0
+  with:
+    multi-mobileprovision-base64: |
+      {
+        "${{ secrets.MY_MOBILEPROVISION_BASE64 }}": ["MyApp"],
+        "${{ secrets.YOUR_MOBILEPROVISION_BASE64 }}": ["YourApp1", "YourApp2"]
+      }
+```
+
+In JSON, the key is base64 encoded mobileprovision file, and the value is an array of target names.
 
 ### `code-signing-identity`
 
